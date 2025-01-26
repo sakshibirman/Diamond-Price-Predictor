@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, abort
 import pandas as pd
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 
@@ -7,12 +7,18 @@ app = application
 
 @app.route('/')
 def index():
-    return render_template('index.html')  # Create an index.html file with your desired UI
+    try:
+        return render_template('index.html')  # Create an index.html file with your desired UI
+    except Exception as e:
+        abort(500, description=f"Error loading index.html: {e}")
 
 @app.route('/predictions', methods=['GET', 'POST'])
 def predict_datapoint():
     if request.method == 'GET':
-        return render_template('home.html')  # Create a home.html file for form submission
+        try:
+            return render_template('home.html')  # Create a home.html file for form submission
+        except Exception as e:
+            abort(500, description=f"Error loading home.html: {e}")
     else:
         data = CustomData(
             carat=float(request.form.get('carat')),
@@ -31,4 +37,4 @@ def predict_datapoint():
         return render_template('home.html', results=f"Predicted Price: ${results[0]:,.2f}")
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)  # Run the application
+    app.run(debug=True, port=5001)
